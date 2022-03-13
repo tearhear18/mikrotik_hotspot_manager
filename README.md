@@ -1,16 +1,37 @@
-# mikrotik_manager
+## Requirement 
+1. Mikrotik device upgraded to 7+ rc version
 
-A new Flutter project.
+## Install Self Signed Certificate
+/certificate
+add name=ca-template days-valid=3650 common-name=your.server.url key-usage=key-cert-sign,crl-sign
+add name=server-template days-valid=3650 common-name=your.server.url
 
-## Getting Started
+/certificate
+sign ca-template name=root-ca
+:delay 3s
+sign ca=root-ca server-template name=server
+:delay 3s
 
-This project is a starting point for a Flutter application.
+/certificate
+set root-ca trusted=yes
+set server trusted=yes
 
-A few resources to get you started if this is your first Flutter project:
+/ip service
+set www-ssl certificate=server disabled=no
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## Test via postman
+https://192.168.88.1/rest/ip/hotspot/user/ramel
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+curl --location --request GET 'https://192.168.88.1/rest/ip/hotspot/user' \
+--header 'Authorization: Basic <BasicAuthToken>' \
+
+### How to generate <BasicAuthToken>
+visit https://www.base64encode.org/
+
+### Encode
+```js 
+  username:password
+
+
+
+
