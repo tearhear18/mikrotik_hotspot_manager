@@ -6,7 +6,6 @@ import 'config.dart';
 
 class ApiService{
   static header(){
-    // config.basicAuth();
     return {
       'Authorization': Config.basicAuth(),
       'Content-Type': 'application/json'

@@ -27,6 +27,16 @@ class CodeController {
     });
   }
 
+  enable(){
+    var params = {"disabled": "false"};
+    ApiService.patch('rest/ip/hotspot/user/${userInfo.username}', params,
+            (StreamedResponse response) {
+          log(response.statusCode.toString());
+          if (response.statusCode == 200) {
+            FormHelper.showAlertDialog(context, "Success", "Account Disabled!");
+          }
+        });
+  }
   disable() {
     var params = {"disabled": "true"};
     ApiService.patch('rest/ip/hotspot/user/${userInfo.username}', params,
@@ -42,7 +52,6 @@ class CodeController {
     var params = {"mac-address": "00:00:00:00:00:00"};
     ApiService.patch('rest/ip/hotspot/user/${userInfo.username}', params,
         (StreamedResponse response) {
-      log(response.statusCode.toString());
       if (response.statusCode == 200) {
         FormHelper.showAlertDialog(
             context, "Success", "Account Mac Address removed!");
@@ -52,12 +61,11 @@ class CodeController {
 
   addCredit(int hour) async {
     TimeParser tp = TimeParser(userInfo.uptimeLimit);
-    log(tp.subHour(hour));
     var params = {"limit-uptime": tp.addHour(hour)};
     ApiService.patch('rest/ip/hotspot/user/${userInfo.username}', params,
         (StreamedResponse response) {
-      log(response.statusCode.toString());
       if (response.statusCode == 200) {
+        // FormHelper.createSnackBar(context, "Time Updated!");
         FormHelper.showAlertDialog(context, "Success", "Time Updated");
       }
     });

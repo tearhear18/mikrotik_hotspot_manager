@@ -59,7 +59,7 @@ class _CodeGeneratorViewState extends State<CodeGeneratorView> {
                         itemCount: codeGenController.codes.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
                             child: Text(codeGenController.codes[index]),
                           );
                         }),

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:mikrotik_manager/common/config.dart';
 import 'package:mikrotik_manager/common/form_helper.dart';
 import 'package:mikrotik_manager/view/dashboard/code/code_controller.dart';
 
@@ -79,6 +80,25 @@ class _CodeViewState extends State<CodeView> {
     final arguments = (ModalRoute.of(context)?.settings.arguments ??
         <String, dynamic>{}) as Map;
     codeController.getUserInfo(arguments['username']);
+
+    List<Widget> loadTimeButton(List<int> settings) {
+      List<Widget> elem = [];
+      int count = 1;
+      for (var timeButton in settings) {
+        elem.add(Flexible(
+          fit: FlexFit.loose,
+          flex: 5,
+          child: FormHelper.button2(
+              "$timeButton H", () => {codeController.addCredit(timeButton)}),
+        ));
+        if (count < settings.length) {
+          elem.add(const SizedBox(width: 5));
+        }
+        count++;
+      }
+      return elem;
+    }
+
     return SafeArea(
         child: Scaffold(
       body: loading
@@ -96,15 +116,20 @@ class _CodeViewState extends State<CodeView> {
                         style: const TextStyle(
                             color: Colors.yellow, fontSize: 40)),
                     const SizedBox(height: 5),
-                    FormHelper.infoText('Account Status', codeController.userInfo.status),
+                    FormHelper.infoText(
+                        'Account Status', codeController.userInfo.status),
                     const SizedBox(height: 5),
-                    FormHelper.infoText('Speed Limit', codeController.userInfo.profile),
+                    FormHelper.infoText(
+                        'Speed Limit', codeController.userInfo.profile),
                     const SizedBox(height: 5),
-                    FormHelper.infoText('Mac Address', codeController.userInfo.macAddress),
+                    FormHelper.infoText(
+                        'Mac Address', codeController.userInfo.macAddress),
                     const SizedBox(height: 5),
-                    FormHelper.infoText('Time Consumed', codeController.userInfo.uptime),
+                    FormHelper.infoText(
+                        'Time Consumed', codeController.userInfo.uptime),
                     const SizedBox(height: 5),
-                    FormHelper.infoText('Time Limit', codeController.userInfo.uptimeLimit),
+                    FormHelper.infoText(
+                        'Time Limit', codeController.userInfo.uptimeLimit),
                   ],
                 ),
               ),
@@ -114,60 +139,47 @@ class _CodeViewState extends State<CodeView> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: FormHelper.button2(
-                                  "1 H", () => {codeController.addCredit(1)}),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: FormHelper.button2(
-                                  "2 H", () => {codeController.addCredit(2)}),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: FormHelper.button2(
-                                  "3 H", () => {codeController.addCredit(3)}),
-                            ),
-                          ],
+                        SizedBox(
+                          height: 168,
+                          child: GridView.count(
+                            // Create a grid with 2 columns. If you change the scrollDirection to
+                            // horizontal, this produces 2 rows.
+                            crossAxisCount: 4,
+                            children: List.generate(Config.timeSettings.length, (index) {
+                              return InkWell(
+                                splashColor: Colors.black,
+                                onTap: (){
+                                  codeController.addCredit(Config.timeSettings[index]);
+                                },
+                                child: Card(
+                                  elevation: 1,
+                                  color: Colors.amber,
+                                  child: Center(
+                                    child: Text(
+                                      '${Config.timeSettings[index]} H'
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
                         ),
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //   children: loadTimeButton(Config.timeSettings),
+                        // ),
+
+                        // const SizedBox(
+                        //   height: 30,
+                        // ),
                         const SizedBox(
                           height: 10,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: FormHelper.button2(
-                                  "4 H", () => {codeController.addCredit(4)}),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: FormHelper.button2(
-                                  "5 H", () => {codeController.addCredit(5)}),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: FormHelper.button2(
-                                  "6 H", () => {codeController.addCredit(6)}),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        FormHelper.button("Disable Account",
-                            () => {codeController.disable()}),
+                        (codeController.userInfo.status == 'Active')
+                            ? FormHelper.button("Disable Account",
+                                () => {codeController.disable()})
+                            : FormHelper.button("Enable Account",
+                                () => {codeController.enable()}),
                         const SizedBox(
                           height: 10,
                         ),

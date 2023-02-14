@@ -1,6 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mikrotik_manager/common/form_helper.dart';
+import 'package:mikrotik_manager/view/dashboard/active_users/active_user_view.dart';
+import 'package:mikrotik_manager/view/dashboard/code_generator/code_generator_view.dart';
 import 'package:mikrotik_manager/view/dashboard/dashboard_controller.dart';
+import 'all_user.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({Key? key}) : super(key: key);
@@ -11,9 +16,8 @@ class DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<DashboardView> {
   DashboardController dashboard = DashboardController();
-  List<String> activeCodes = [];
-  List<String> onlineUsers = [];
-  bool loading = true;
+  int index = 0;
+
 
   Widget _DialogWithTextField(BuildContext context) => Container(
         padding: EdgeInsets.all(20),
@@ -77,84 +81,41 @@ class _DashboardViewState extends State<DashboardView> {
         });
   }
 
+  List<Widget> screens = [
+    const AllUser(),
+    const ActiveUserView(),
+    const CodeGeneratorView(),
+  ];
   @override
   Widget build(BuildContext context) {
     dashboard.ctx = context;
-    dashboard.setStateCallback = () {
-      setState(() {});
-      loading = false;
-    };
-    dashboard.codeVoucher.addListener(() {
-      String code = dashboard.codeVoucher.text.toString();
-      activeCodes =
-          dashboard.codes.where((element) => element.contains(code)).toList();
-      setState(() {});
-    });
     return SafeArea(
         child: Scaffold(
-      body: loading
-          ? FormHelper.loadingScreen()
-          : Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  child: FormHelper.button("View Active Users", () {
-                    Navigator.pushNamed(context, '/active_users');
-                  }),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                  child: FormHelper.button("Generate Voucher Code", () {
-                    Navigator.pushNamed(context, '/code_generator');
-                  }),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  child: FormHelper.inputField(
-                      dashboard.codeVoucher,
-                      "Search Code",
-                      false,
-                      true,
-                      TextInputType.text,
-                      TextInputAction.next,
-                      dashboard.codeVoucherFocus),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: activeCodes.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/code',
-                                arguments: {'username': activeCodes[index]});
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: Text(activeCodes[index]),
-                          ),
-                        );
-                      }),
-                ),
-              ],
+          body: screens[index],
+          floatingActionButton: Visibility(
+            child: FloatingActionButton(
+                onPressed: () {
+                displayDialog();
+              },
+              child: const Icon(Icons.person_add),
+              backgroundColor: Colors.indigo,
             ),
-      floatingActionButton: Visibility(
-        visible: !loading,
-        child: FloatingActionButton(
-          onPressed: () {
-            displayDialog();
-          },
-          child: const Icon(Icons.person_add),
-          backgroundColor: Colors.indigo,
-        ),
-      ),
+          ),
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: index,
+            height: 60,
+            onDestinationSelected: ( i ){
+              log(index.toString());
+              setState(() {
+                index = i;
+              });
+            },
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.supervised_user_circle), label: "All Users"),
+              NavigationDestination(icon: Icon(Icons.online_prediction), label: "Online Users"),
+              NavigationDestination(icon: Icon(Icons.code_off_outlined), label: "Code Generator")
+            ],
+          ),
     ));
-  }
-
-  @override
-  initState() {
-    dashboard.getVouchers();
-    // dashboard.getActiveUsers();
-    super.initState();
   }
 }

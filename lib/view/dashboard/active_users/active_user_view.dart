@@ -15,7 +15,7 @@ class ActiveUserView extends StatefulWidget {
 class _ActiveUserViewState extends State<ActiveUserView> {
   ActiveUserController activeUserCtrl = ActiveUserController();
   bool loading = true;
-  RefreshController _refreshController =
+  final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
   void _onRefresh() async {
@@ -33,26 +33,32 @@ class _ActiveUserViewState extends State<ActiveUserView> {
   Widget build(BuildContext context) {
     activeUserCtrl.context = context;
     return SafeArea(
-      child: Scaffold(
+      child: loading ? FormHelper.loadingScreen() : Scaffold(
         body: SmartRefresher(
           enablePullDown: true,
-          enablePullUp: true,
+          enablePullUp: false,
           header: const WaterDropHeader(),
           controller: _refreshController,
           onRefresh: _onRefresh,
           // onLoading: _onLoading,
           child: ListView.builder(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               itemCount: activeUserCtrl.activeUsers.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
-                    padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    margin: EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                    margin: const EdgeInsets.only(bottom: 6),
                     color: Colors.black26,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(activeUserCtrl.activeUsers[index].code),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(activeUserCtrl.activeUsers[index].code, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                            Text(activeUserCtrl.activeUsers[index].sessionTimeLeft),
+                          ],
+                        ),
                         Expanded(
                             child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -64,7 +70,7 @@ class _ActiveUserViewState extends State<ActiveUserView> {
                             const SizedBox(
                               width: 10,
                             ),
-                            FormHelper.button3("Disconnect", () {
+                            FormHelper.button3("Remove", () {
                               activeUserCtrl.disconnect(
                                   activeUserCtrl.activeUsers[index]);
                               activeUserCtrl.activeUsers.removeAt(index);

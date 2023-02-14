@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:mikrotik_manager/common/config.dart';
 import 'package:http/http.dart';
 
+import '../../common/api_service.dart';
+
 class LoginController {
   TextEditingController host = TextEditingController();
   TextEditingController user = TextEditingController();
@@ -45,16 +47,16 @@ class LoginController {
   }
 
   initLogin() async {
-    String apiUrl = 'https://192.168.88.1/rest/ip/hotspot/active';
-    String basicAuth = 'Basic ' +
-        base64Encode(utf8.encode('${Config.username}:${Config.password}'));
-
-    Response r =
-        await get(Uri.parse(apiUrl), headers: {'authorization': basicAuth});
-    if (r.statusCode != 200) {
-      showAlertDialog(ctx);
-    } else {
-      Navigator.pushReplacementNamed(ctx, '/dashboard');
-    }
+    log("called?");
+    ApiService.get('rest/ip/hotspot/active', (response){
+      log("========");
+      log(response.statusCode.toString());
+      log("========");
+      if (response.statusCode != 200) {
+        showAlertDialog(ctx);
+      } else {
+        Navigator.pushReplacementNamed(ctx, '/dashboard');
+      }
+    });
   }
 }

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:mikrotik_manager/common/api_service.dart';
@@ -10,7 +10,8 @@ class ActiveCode {
   String code;
   String macAddress;
   String id;
-  ActiveCode(this.id, this.code, this.macAddress);
+  String sessionTimeLeft;
+  ActiveCode(this.id, this.code, this.macAddress, this.sessionTimeLeft);
 }
 
 class ActiveUserController {
@@ -21,7 +22,6 @@ class ActiveUserController {
   disconnect(user) {
     ApiService.delete('rest/ip/hotspot/active/${user.id}',
         (StreamedResponse response) {
-      log(response.statusCode.toString());
       if (response.statusCode == 200) {
         FormHelper.showAlertDialog(
             context, "Success", "Account locked to Mac Address!");
@@ -33,7 +33,6 @@ class ActiveUserController {
     var params = {"mac-address": user.macAddress};
     ApiService.patch('rest/ip/hotspot/user/${user.code}', params,
         (StreamedResponse response) {
-      log(response.statusCode.toString());
       if (response.statusCode == 200) {
         FormHelper.showAlertDialog(
             context, "Success", "Account locked to Mac Address!");
@@ -46,8 +45,9 @@ class ActiveUserController {
     ApiService.get('rest/ip/hotspot/active', (response) async {
       List data = jsonDecode(await response.stream.bytesToString());
       for (var user in data) {
+        String sessionTimeLeft = user['session-time-left'] ?? "Unlimited";
         activeUsers
-            .add(ActiveCode(user['.id'], user['user'], user['mac-address']));
+            .add(ActiveCode(user['.id'], user['user'], user['mac-address'], sessionTimeLeft));
       }
       setStateCallback();
     });

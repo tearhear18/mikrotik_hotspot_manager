@@ -6,7 +6,7 @@ import 'package:mikrotik_manager/common/api_service.dart';
 import 'package:mikrotik_manager/view/dashboard/code/code_controller.dart';
 import 'package:mikrotik_manager/view/dashboard/dashboard_controller.dart';
 
-class CodeGeneratorController{
+class CodeGeneratorController {
   TextEditingController size = TextEditingController();
   TextEditingController time = TextEditingController();
   FocusNode sizeFocus = FocusNode();
@@ -25,25 +25,47 @@ class CodeGeneratorController{
 
     return randomString;
   }
+
   void addUser(int hour, String user) async {
-    var params = {"name": user, "profile": "1M-BAND", "limit-uptime": "${hour}h"};
-    ApiService.put('rest/ip/hotspot/user', params, (response){
-      if(response.statusCode == 201){
+    var params = {
+      "name": user,
+      "profile": "1M-BAND",
+      "limit-uptime": "${hour}h"
+    };
+    ApiService.put('rest/ip/hotspot/user', params, (response) {
+      if (response.statusCode == 201) {
         setStateCallback();
       }
     });
   }
 
-  generate(){
+  generate() {
     codes.clear();
     int codeSize = int.parse(size.text.trim());
     int hour = int.parse(time.text.trim());
-    String pattern = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    String pattern =
+        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
 
-    for(int a = 1; a <= codeSize; a++){
+    for (int a = 1; a <= codeSize; a++) {
       String newCode = generateRandomString(8).toUpperCase();
-      codes.add(newCode);
-      addUser(hour, newCode);
+
+      var params = {
+        "name": newCode,
+        "profile": "1M-BAND",
+        "limit-uptime": "${hour}h"
+      };
+      print(params);
+      ApiService.put('rest/ip/hotspot/user', params, (response) {
+        print(response.statusCode);
+        if (response.statusCode == 201) {
+          // add only when code was registered to mikrotik
+          codes.add(newCode);
+          print(response.statusCode);
+          setStateCallback();
+        }
+      });
+
     }
+
   }
 }
